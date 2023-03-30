@@ -3,6 +3,7 @@ const app = express();
 app.use(express.static('public'));
 require ('dotenv').config();
 KEY = process.env.API_KEY
+const request = require('request');
 // Tenor
 const Tenor = require("tenorjs").client({
   // Replace with your own key
@@ -44,10 +45,31 @@ app.get('/greetings/:name', (req, res) => {
   res.render('greetings', {name});
 });
 
+app.get('/tenorapi', (req, res) => {
+  term = ''
+  const limit = 10;
+  if (req.query.term) {
+    term = req.query.term
+    tenorAPIURL = 'https://tenor.googleapis.com/v2/search?q=' + term + '&key=' + KEY + '&limit=' + limit + '&contentfilter=high';
+    request(tenorAPIURL, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        const data = JSON.parse(body);
+        gifs = data['results']
+        res.render('tenorapi', { gifs })
+      } else {
+        res.render('tenorapi', { gifs: [] })
+      }
+    });
+  } else {
+    res.render('tenorapi', { gifs: [] })
+  }
+});
+
+
 
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
 
-// AIzaSyAsaHzJNGyyZKpPo1-tfiDEuNH7GCJ3wlA
+// NEED TO DO CSS ON IT
